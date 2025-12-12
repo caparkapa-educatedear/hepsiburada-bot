@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL") // Optional for some Vercel Postgres setups
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String // Hashed password
+  role      String   @default("USER") // ADMIN, USER
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Template {
+  id        String   @id @default(cuid())
+  name      String
+  content   String // Message content with placeholders {title}, {price}, etc.
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BotSettings {
+  id              String   @id @default(cuid())
+  botToken        String
+  channelUsername String // @channelname or chat_id
+  isActive        Boolean  @default(true)
+  checkInterval   Int      @default(15) // Minutes (for info purposes, cron controls actual run)
+  cronSecret      String   @default("changeme") // For securing the API route
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Product {
+  id           String   @id @default(cuid())
+  externalId   String   @unique // Hepsiburada ID or URL hash
+  name         String
+  price        String
+  originalPrice String?
+  discountRate String?
+  url          String
+  imageUrl     String?
+  sentAt       DateTime? // When it was sent to Telegram
+  createdAt    DateTime @default(now())
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  level     String   // INFO, ERROR, WARN
+  message   String
+  createdAt DateTime @default(now())
+}
